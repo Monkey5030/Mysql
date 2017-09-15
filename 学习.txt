@@ -1,0 +1,58 @@
+.LOG
+文件  		作用
+ 
+tbl_name.frm  表格式（定义）文件
+ 
+tbl_name.MYD 数据文件
+ 
+tbl_name.MYI 索引文件
+ 
+Mysql 中联接SQL语句中，ON子句的语法格式为：table1.column_name = table2.column_name。
+当模式设计对联接表的列采用了相同的命名样式时，就可以使用 USING 语法来简化 ON 语法，格式为：USING(column_name)。
+14:42 2017/7/10
+IF(Condition,A,B)
+
+意义：当Condition为TRUE时，返回A；当Condition为FALSE时，返回B。
+14:43 2017/7/10
+
+10:16 2017/7/17
+行转列
+CREATE TABLE `score` (
+  `name` varchar(20) default NULL,
+  `course` varchar(20) default NULL,
+  `grade` int(11) default NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8
+select DISTINCT c.`name` as  name,(select grade from score where name=c.`name` and course='java') as java,
+(select grade from score where name=c.`name` and course='c') as c,
+(select grade from score where name=c.`name` and course='go')as go
+from score c
+select name ,SUM(case course when 'java' then grade end) java,
+SUM(case course when 'c' then grade end) java,
+SUM(case course when 'go' then grade end) java
+from score GROUP BY name
+10:24 2017/7/17
+
+11:11 2017/7/18
+随机取数据 join效率高
+SELECT *
+FROM `table` AS t1 JOIN (SELECT ROUND(RAND() * (SELECT MAX(id) FROM `table`)) AS id) AS t2
+WHERE t1.id >= t2.id
+ORDER BY t1.id ASC LIMIT 5;
+SELECT * FROM `table`
+WHERE id >= (SELECT floor( RAND() * ((SELECT MAX(id) FROM `table`)-(SELECT MIN(id) FROM `table`)) + (SELECT MIN(id) FROM `table`))) 
+ORDER BY id LIMIT 1;
+11:40 2017/8/9
+开发规范
+表设计的规范：字段数量建议不超过20-50个做好数据评估，建议纯INT不超过1500万，含有CHAR的不要超过1000万。字段类型在满足需求条件下越小越好，尽量使用UNSIGNED存储非负整数，因为实际使用时候存储负数的场景不多。将字符转换成数字存储。例如使用UNSIGNED INT存储IPv4 地址而不是用CHAR(15) ，但这种方式只能存储IPv4，存储不了IPv6。另外可以考虑将日期转化为数字，如：from_unixtime()、unix_timestamp()。所有字段均定义为NOT NULL，除非你真的想存储null。
+
+Schema设计原则核心表字段数量尽可能地少，有大字段要考虑拆分适当考虑一些反范式的表设计，增加冗余字段，减少JOIN 资金字段考虑统一*100处理成整型，避免使用decimal浮点类型存储日志类型的表可以考虑按创建时间水平切割，定期归档历史数据
+
+垂直拆分
+优点：拆分简单明了，拆分规则明确应用程序模块清晰，整合容易数据维护方便易行，容易定位
+缺点：表关联需要改到程序中完成事务处理变的复杂热点表还有可能存在性能瓶颈过度拆分会造成管理复杂
+水平拆分
+优点：不会影响表关联、事务操作超大规模的表和高负载的表可以打散应用程序端改动比较小拆分能提升性能，也比较易扩展
+缺点：数据分散，影响聚集函数的使用切分规则复杂，维护难度增加后期迁移较复杂
+11:45 2017/8/9
+
+11:11 2017/9/14
