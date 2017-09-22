@@ -1,0 +1,24 @@
+db.col.find({"key1":"value1","key2":"value2"})
+db.col.find({$or:[{"key1":"value1"},{"key2":"value2"}]})
+db.col.remove({})
+db.col.find({"title" : {$type : 2}}) 查找title类型为string的数据
+db.COLLECTION_NAME.find().limit(NUMBER) 查找指定数量的数据
+db.COLLECTION_NAME.find().limit(NUMBER).skip(NUMBER) skip默认参数为0，跳过指定数量的数据
+在MongoDB中使用使用sort()方法对数据进行排序，sort()方法可以通过参数指定排序的字段，并使用 1 和 -1 来指定排序的方式，其中 1 为升序排列，而-1是用于降序排列。
+db.COLLECTION_NAME.find().sort({KEY:1})
+db.COLLECTION_NAME.ensureIndex({KEY:1}) 语法中 Key 值为你要创建的索引字段，1为指定按升序创建索引，如果你想按降序来创建索引指定为-1即可。
+db.values.ensureIndex({open: 1, close: 1}, {background: true})
+db.COLLECTION_NAME.aggregate(AGGREGATE_OPERATION)
+MongoDB的聚合管道将MongoDB文档在一个管道处理完毕后将结果传递给下一个管道处理。
+$project：修改输入文档的结构。可以用来重命名、增加或删除域，也可以用于创建计算结果以及嵌套文档。
+$match：用于过滤数据，只输出符合条件的文档。$match使用MongoDB的标准查询操作。
+$limit：用来限制MongoDB聚合管道返回的文档数。
+$skip：在聚合管道中跳过指定数量的文档，并返回余下的文档。
+$unwind：将文档中的某一个数组类型字段拆分成多条，每条包含数组中的一个值。
+$group：将集合中的文档分组，可用于统计结果。
+$sort：将输入文档排序后输出。
+$geoNear：输出接近某一地理位置的有序文档。
+db.articles.aggregate( [
+                        { $match : { score : { $gt : 70, $lte : 90 } } },
+                        { $group: { _id: null, count: { $sum: 1 } } }
+                       ] );
