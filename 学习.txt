@@ -15,6 +15,17 @@ alter table film_test2 enable keys;
 
 mysqlbinlog --verbose master_bin.000001 (基于行的日志)
 SHOW BINLOG EVENTS IN 'mysql-bin.000001'
+myisampack
+mysqlslap
+pt-query-digest http://blog.csdn.net/seteor/article/details/24017913
+show profile
+set profiling=1; show profiles;show profile for query quert_id;
+select state,sum(duration) as total_r,round(100*sum(duration)/(select sum(duration) from information_schema.profiling where query_id=?),2) as pct_r,count(*) as calls,sum(duration)/count(*) as "r/call" from information_schema.profiling where query_id=? group by state order by total_r desc
+
+
+概念
+ACID 原子性 一致性 隔离性 持久性
+
 
 权限与安全
 权限授予
@@ -168,21 +179,6 @@ Schema设计原则核心表字段数量尽可能地少，有大字段要考虑�
 水平拆分
 优点：不会影响表关联、事务操作超大规模的表和高负载的表可以打散应用程序端改动比较小拆分能提升性能，也比较易扩展
 缺点：数据分散，影响聚集函数的使用切分规则复杂，维护难度增加后期迁移较复杂
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 mysql命令行客户端，也称为MySQL CLI 
