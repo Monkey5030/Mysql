@@ -1,20 +1,131 @@
-.LOG
-文件  		作用
- 
+命令行操作
+show status like 'Com_%';
+通过以上几个参数，可以很容易地了解当前数据库的应用是以插入更新为主还是以查询
+操作为主，以及各种类型的SQL 大致的执行比例是多少。
+
+ANALYZE TABLE tablename;
+check table tablename;
+optimize table tablename;
+这个命令可以将表中的空间碎片进行合并，并且可以消除由于删除或者更新造成的空间浪费，但OPTIMIZE TABLE 命令只对MyISAM、BDB 和InnoDB 表起作用。
+
+load data infile '/home/mysql/film_test.txt' into table tablename;
+alter table film_test2 disable keys;
+load data infile '/home/mysql/film_test.txt' into table tablename;
+alter table film_test2 enable keys;
+
+mysqlbinlog --verbose master_bin.000001 (基于行的日志)
+SHOW BINLOG EVENTS IN 'mysql-bin.000001'
+
+权限与安全
+权限授予
+'GRANT ALL PRIVILEGES ON `indu_program`.* TO \'credit_l\'@\'%\''
+'GRANT USAGE ON *.* TO \'credit_l\'@\'%\' IDENTIFIED BY PASSWORD \'*3100D4383269AAD781A4483B928CF9BDB8AC53C5\''
+权限移除
+GRANT ALL PRIVILEGES ON *.* TO 'cacti'@'%' IDENTIFIED BY 'cacti' WITH GRANT OPTION;  
+#重新载入赋权表  
+FLUSH PRIVILEGES;  
+#收回权限(不包含赋权权限)  
+REVOKE ALL PRIVILEGES ON *.* FROM cacti;  
+REVOKE ALL PRIVILEGES ON cacti.* FROM cacti;  
+#收回赋权权限  
+REVOKE GRANT OPTION ON *.* FROM cacti;  
+#重新载入赋权表  
+FLUSH PRIVILEGES;  
+
+
+配置文件
 tbl_name.frm  表格式（定义）文件
- 
 tbl_name.MYD 数据文件
- 
 tbl_name.MYI 索引文件
- 
-Mysql 中联接SQL语句中，ON子句的语法格式为：table1.column_name = table2.column_name。
-当模式设计对联接表的列采用了相同的命名样式时，就可以使用 USING 语法来简化 ON 语法，格式为：USING(column_name)。
 
+临时开启通用查询日志
+set global general_log='on';
+explain extended
+show warnings
+perror 错误号
+show status like 'handler%';检查是否使用了索引
+
+二进制命令
+二进制日志（binary log）记录了对MySQL数据库执行更改的所有操作，但是不包括SELECT和SHOW这类操作，因为这类操作对数据本身并没有修改。然而，若操作本身并没有导致数据库发生变化，那么该操作可能也会写入二进制日志。
+SHOW BINLOG EVENTS IN 'mysql-bin.000001'
+
+sql_mode
+解析
+这个sql_mode,简而言之就是：它定义了你MySQL应该支持的sql语法，对数据的校验等等。。
+一、如何查看当前数据库使用的sql_mode：
+select @@sql_mode;  
+二、sql_mode值的含义：
+ONLY_FULL_GROUP_BY：
+对于GROUP BY聚合操作，如果在SELECT中的列，没有在GROUP BY中出现，那么将认为这个SQL是不合法的，因为列不在GROUP BY从句中
+STRICT_TRANS_TABLES：
+在该模式下，如果一个值不能插入到一个事务表中，则中断当前的操作，对非事务表不做任何限制
+NO_ZERO_IN_DATE：
+在严格模式，不接受月或日部分为0的日期。如果使用IGNORE选项，我们为类似的日期插入'0000-00-00'。在非严格模式，可以接受该日期，但会生成警告。
+NO_ZERO_DATE：
+在严格模式，不要将 '0000-00-00'做为合法日期。你仍然可以用IGNORE选项插入零日期。在非严格模式，可以接受该日期，但会生成警告
+ERROR_FOR_DIVISION_BY_ZERO：
+在严格模式，在INSERT或UPDATE过程中，如果被零除(或MOD(X，0))，则产生错误(否则为警告)。如果未给出该模式，被零除时MySQL返回NULL。如果用到INSERT IGNORE或UPDATE IGNORE中，MySQL生成被零除警告，但操作结果为NULL。
+NO_AUTO_CREATE_USER
+防止GRANT自动创建新用户，除非还指定了密码。
+NO_ENGINE_SUBSTITUTION：
+如果需要的存储引擎被禁用或未编译，那么抛出错误。不设置此值时，用默认的存储引擎替代，并抛出一个异常
+三、据说是MySQL5.0以上版本支持三种sql_mode模式：ANSI、TRADITIONAL和STRICT_TRANS_TABLES。 
+1、ANSI模式：宽松模式，更改语法和行为，使其更符合标准SQL。对插入数据进行校验，如果不符合定义类型或长度，对数据类型调整或截断保存，报warning警告。对于本文开头中提到的错误，可以先把sql_mode设置为ANSI模式，这样便可以插入数据，而对于除数为0的结果的字段值，数据库将会用NULL值代替。
+将当前数据库模式设置为ANSI模式：
+ set @@sql_mode=ANSI;  
+2、TRADITIONAL模式：严格模式，当向mysql数据库插入数据时，进行数据的严格校验，保证错误数据不能插入，报error错误，而不仅仅是警告。用于事物时，会进行事物的回滚。 注释：一旦发现错误立即放弃INSERT/UPDATE。如果你使用非事务存储引擎，这种方式不是你想要的，因为出现错误前进行的数据更改不会“滚动”，结果是更新“只进行了一部分”。
+将当前数据库模式设置为TRADITIONAL模式：
+ set @@sql_mode=TRADITIONAL;   
+ 3、STRICT_TRANS_TABLES模式：严格模式，进行数据的严格校验，错误数据不能插入，报error错误。如果不能将给定的值插入到事务表中，则放弃该语句。对于非事务表，如果值出现在单行语句或多行语句的第1行，则放弃该语句。
+将当前数据库模式设置为STRICT_TRANS_TABLES模式：
+ set @@sql_mode=STRICT_TRANS_TABLES;  
+另外说一点，这里的更改数据库模式都是session级别的，一次性，关了再开就不算数了！！！
+也可以通过配置文件设置:vim /etc/my.cnf
+在my.cnf（my.ini）添加如下配置:
+[mysqld]
+sql_mode='你想要的模式'
+
+二进制日志的删除
+服务器自动清理旧的binlog文件，需设置expire-logs-days选项
+purge binary logs before datetime
+purge binary logs to 'filename'
+二进制日志过滤器
+[mysqld]
+binlog-ignore-db=one_db
+binlog-do-db=two_db
+
+
+复制、备份与恢复
+mysqldump -uroot -p --databases databasename >dump.sql 数据库备份
+mysqldump -uroot -p --databases database.table >dump.sql 数据库表备份
+
+主从复制的服务器配置
+1.主服务器
+log-bin=mysql-bin
+sever-id=**
+2.从服务器
+log-bin=mysql-bin
+sever-id=**
+3.重启两台服务器的mysql
+4.主服务器建立授权
+grant replication slave on *.* to 'username'@'host' identified by 'password';
+5.show master status;记录master_log_file,master_log_pos
+6.stop slave 
+change master to master_host='192.168.203.129',master_user='mysync',master_password='q123456',master_log_file='mysql-bin.000017',master_log_pos=107;
+start slave
+7.show slave status
+
+
+存储函数和函数
 IF(Condition,A,B)
-
 意义：当Condition为TRUE时，返回A；当Condition为FALSE时，返回B。
 
+substring(group_contact(字段1 order by 字段2 desc),',',1) 取出按字段2倒xu排列的字段1
+substring_index('varstr',string,1) 按varstr的位置截取字符串string，1顺序，-1倒序
+postion(),locate(),instr() 返回字符在字段中的位置
 
+
+技巧
 行转列
 CREATE TABLE `score` (
   `name` varchar(20) default NULL,
@@ -30,8 +141,6 @@ SUM(case course when 'c' then grade end) java,
 SUM(case course when 'go' then grade end) java
 from score GROUP BY name
 
-
-
 随机取数据 join效率高
 SELECT *
 FROM `table` AS t1 JOIN (SELECT ROUND(RAND() * (SELECT MAX(id) FROM `table`)) AS id) AS t2
@@ -40,6 +149,13 @@ ORDER BY t1.id ASC LIMIT 5;
 SELECT * FROM `table`
 WHERE id >= (SELECT floor( RAND() * ((SELECT MAX(id) FROM `table`)-(SELECT MIN(id) FROM `table`)) + (SELECT MIN(id) FROM `table`))) 
 ORDER BY id LIMIT 1;
+
+处理重复数据
+group by
+distinct
+ALTER IGNORE TABLE person_tbl ADD PRIMARY KEY (last_name, first_name);
+DELETE t1 FROM table1 AS t1 JOIN table1 AS t2 ON t1.id>t2.id AND t1.name=t2.name;
+
 
 开发规范
 表设计的规范：字段数量建议不超过20-50个做好数据评估，建议纯INT不超过1500万，含有CHAR的不要超过1000万。字段类型在满足需求条件下越小越好，尽量使用UNSIGNED存储非负整数，因为实际使用时候存储负数的场景不多。将字符转换成数字存储。例如使用UNSIGNED INT存储IPv4 地址而不是用CHAR(15) ，但这种方式只能存储IPv4，存储不了IPv6。另外可以考虑将日期转化为数字，如：from_unixtime()、unix_timestamp()。所有字段均定义为NOT NULL，除非你真的想存储null。
@@ -53,28 +169,66 @@ Schema设计原则核心表字段数量尽可能地少，有大字段要考虑�
 优点：不会影响表关联、事务操作超大规模的表和高负载的表可以打散应用程序端改动比较小拆分能提升性能，也比较易扩展
 缺点：数据分散，影响聚集函数的使用切分规则复杂，维护难度增加后期迁移较复杂
 
-提取字段中的汉字，使用存储函数
-DELIMITER $$
 
-USE `zhongguo`$$
 
-DROP FUNCTION IF EXISTS `GetNum`$$
 
-CREATE DEFINER=`root`@`localhost` FUNCTION `GetNum`(Varstring TEXT) RETURNS TEXT CHARSET utf8
-BEGIN
-DECLARE v_length INT DEFAULT 0;
-DECLARE v_Tmp TEXT DEFAULT '';
-SET v_length=CHAR_LENGTH(Varstring);
-WHILE v_length > 0 DO
-IF LENGTH(MID(Varstring,v_length,1))=3   THEN
-SET v_Tmp=CONCAT(v_Tmp,MID(Varstring,v_length,1));
-END IF;
-SET v_length = v_length - 1;
-END WHILE;
-RETURN REVERSE(v_Tmp);
-END$$
 
-DELIMITER ;
+
+
+
+
+
+
+
+
+
+
+
+
+mysql命令行客户端，也称为MySQL CLI 
+为了测试应用程序返回的结果是否与你期望的一致，使用 --column-type-info 选项启动mysql cli
+mysql --column-type-info teat
+Welcome to the MySQL monitor.  Commands end with ; or \g.
+Your MySQL connection id is 11
+Server version: 5.7.17-log MySQL Community Server (GPL)
+
+Copyright (c) 2000, 2016, Oracle and/or its affiliates. All rights reserved.
+
+Oracle is a registered trademark of Oracle Corporation and/or its
+affiliates. Other names may be trademarks of their respective
+owners.
+
+Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+
+mysql> select * from sales;
+Field   1:  `sales_id`
+Catalog:    `def`
+Database:   `teat`
+Table:      `sales`
+Org_table:  `sales`
+Type:       LONG
+Collation:  binary (63)
+Length:     10
+Max_length: 1
+Decimals:   0
+Flags:      NOT_NULL PRI_KEY UNSIGNED AUTO_INCREMENT NUM PART_KEY
+
+Field   2:  `product_name`
+Catalog:    `def`
+Database:   `teat`
+Table:      `sales`
+Org_table:  `sales`
+Type:       VAR_STRING
+Collation:  utf8_general_ci (33)
+Length:     384
+Max_length: 5
+Decimals:   0
+Flags:      NOT_NULL NO_DEFAULT_VALUE
+
+
+
+
+
 
 
 
