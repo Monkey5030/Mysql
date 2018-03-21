@@ -167,6 +167,13 @@ distinct
 ALTER IGNORE TABLE person_tbl ADD PRIMARY KEY (last_name, first_name);
 DELETE t1 FROM table1 AS t1 JOIN table1 AS t2 ON t1.id>t2.id AND t1.name=t2.name;
 
+交集、并集和差集用sql实现 
+http://www.cnblogs.com/jackson0714/p/TSQLFundamentals_05.html
+http://blog.csdn.net/GOOWJ/article/details/8728189
+SELECT a.* FROM(SELECT id,code,name FROM test_emp UNION ALL SELECT id,code,name FROM test_emp WHERE dept='JSB')a GROUP BY a.id HAVING COUNT(a.id)=1 #差集
+SELECT a.* FROM(SELECT id,code,name FROM test_emp WHERE age>25 UNION ALL SELECT id,code,name FROM test_emp WHERE dept='JSB')a GROUP BY a.id HAVING COUNT(a.id)=2 #交集
+SELECT a.* FROM(SELECT id,code,name FROM test_emp WHERE age>25 UNION SELECT id,code,name FROM test_emp WHERE dept='JSB')a #并集
+
 
 开发规范
 表设计的规范：字段数量建议不超过20-50个做好数据评估，建议纯INT不超过1500万，含有CHAR的不要超过1000万。字段类型在满足需求条件下越小越好，尽量使用UNSIGNED存储非负整数，因为实际使用时候存储负数的场景不多。将字符转换成数字存储。例如使用UNSIGNED INT存储IPv4 地址而不是用CHAR(15) ，但这种方式只能存储IPv4，存储不了IPv6。另外可以考虑将日期转化为数字，如：from_unixtime()、unix_timestamp()。所有字段均定义为NOT NULL，除非你真的想存储null。
