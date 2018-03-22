@@ -104,6 +104,7 @@ purge binary logs to 'filename'
 [mysqld]
 binlog-ignore-db=one_db
 binlog-do-db=two_db
+Mysql实现企业级日志管理、备份与恢复的实战教程 http://www.jb51.net/article/130069.htm
 
 
 复制、备份与恢复
@@ -235,6 +236,18 @@ SELECT * FROM your_table WHERE id <=
 (SELECT id FROM your_table ORDER BY id desc LIMIT ($page-1)*$pagesize ORDER BY id desc LIMIT $pagesize
 
 
-
+监控
+linux和unix系统监控工具
+ps 显示系统上运行的进程列表 ps -A | grep mysqld       
+top 显示根据cpu使用率排序的活动进程  top -d 3 每3秒刷新命令
+vmstat 显示内存、分页、块传输和CPU活动的相关信息
+uptime 显示系统运行了多长时间
+free 显示内存使用率
+iostat 显示平均磁盘活动和处理器负载情况
+sar 显示系统活动报告
+pmap 显示各种进程分别占用内存的情况
+mpstat 显示多处理器系统的CPU使用率
+netstat 显示网络活动的相关信息
+cron 可以让你安排进程执行的子系统
 
 
