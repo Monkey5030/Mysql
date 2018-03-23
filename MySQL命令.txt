@@ -258,5 +258,7 @@ SELECT * FROM schema_auto_increment_columns; #表自增id监控
 SELECT* FROM statements_with_full_table_scans WHERE db='zhongguo' #监控全表扫描的sql语句
 SELECT FILE,avg_read+avg_write AS avg_io FROM io_global_by_file_by_bytes ORDER BY avg_io DESC LIMIT 10 #查看实例消耗的磁盘io
 
+sysbench https://blog.csdn.net/mysql_lover/article/details/54139837
+
 
 
