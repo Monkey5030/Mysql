@@ -250,4 +250,13 @@ mpstat 显示多处理器系统的CPU使用率
 netstat 显示网络活动的相关信息
 cron 可以让你安排进程执行的子系统
 
+sys
+SELECT table_schema,table_name,io_read_requests+io_write_requests AS tot FROM schema_table_statistics;  #查看表的访问量
+SELECT * FROM schema_redundant_indexes; #冗余索引与未使用索引检查
+SELECT * FROM schema_unused_indexes;
+SELECT * FROM schema_auto_increment_columns; #表自增id监控
+SELECT* FROM statements_with_full_table_scans WHERE db='zhongguo' #监控全表扫描的sql语句
+SELECT FILE,avg_read+avg_write AS avg_io FROM io_global_by_file_by_bytes ORDER BY avg_io DESC LIMIT 10 #查看实例消耗的磁盘io
+
+
 
