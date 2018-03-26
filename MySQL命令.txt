@@ -267,7 +267,9 @@ SELECT * FROM schema_auto_increment_columns; #表自增id监控
 SELECT* FROM statements_with_full_table_scans WHERE db='zhongguo' #监控全表扫描的sql语句
 SELECT FILE,avg_read+avg_write AS avg_io FROM io_global_by_file_by_bytes ORDER BY avg_io DESC LIMIT 10 #查看实例消耗的磁盘io
 
-sysbench https://blog.csdn.net/mysql_lover/article/details/54139837
+sysbench 
+https://blog.csdn.net/mysql_lover/article/details/54139837
+http://www.cnblogs.com/Aiapple/p/5702977.html
 
 数据库预热 
 SELECT table_schema, table_name FROM information_schema.tables mysql5.1
@@ -277,6 +279,9 @@ innodb_buffer_pool_dump_now = 1：采用手工方式把热数据dump到本地磁
 innodb_buffer_pool_load_at_startup=1：启动时把热数据加载到内存
 innodb_buffer_pool_load_now=1：采用手工方式把热数据加载到内存
 只有在正常关闭或pkill mysql是才会将热数据导出。
+
+性能调优
+http://www.cnblogs.com/chunguang/p/5694582.html
 
 
 
