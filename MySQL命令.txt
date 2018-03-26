@@ -60,6 +60,11 @@ show status like 'handler%';检查是否使用了索引
 二进制日志（binary log）记录了对MySQL数据库执行更改的所有操作，但是不包括SELECT和SHOW这类操作，因为这类操作对数据本身并没有修改。然而，若操作本身并没有导致数据库发生变化，那么该操作可能也会写入二进制日志。
 SHOW BINLOG EVENTS IN 'mysql-bin.000001'
 
+binlog_format
+row  statement mixed三种格式RBR SBR MBR
+在row格式下，开启binlog_rows_query_log_events参数
+
+
 sql_mode
 解析
 这个sql_mode,简而言之就是：它定义了你MySQL应该支持的sql语法，对数据的校验等等。。
@@ -127,6 +132,10 @@ change master to master_host='192.168.203.129',master_user='mysync',master_passw
 start slave
 7.show slave status
 
+数据库性能拾遗
+1.适当的数据文件大小
+2.碎片空洞问题
+3.设计问题 a 字段的合理设置 b 行存储格式 c 索引问题
 
 存储函数和函数
 IF(Condition,A,B)
@@ -259,6 +268,15 @@ SELECT* FROM statements_with_full_table_scans WHERE db='zhongguo' #监控全表�
 SELECT FILE,avg_read+avg_write AS avg_io FROM io_global_by_file_by_bytes ORDER BY avg_io DESC LIMIT 10 #查看实例消耗的磁盘io
 
 sysbench https://blog.csdn.net/mysql_lover/article/details/54139837
+
+数据库预热 
+SELECT table_schema, table_name FROM information_schema.tables mysql5.1
+通常在mysql重启服务后，需要通过手工执行SQL来预热buffer_pool，在mysql5.6中，有如下参数可以无需人工干预。
+innodb_buffer_pool_dump_at_shutdown= 1:在关闭时把热数据dump到本地磁盘
+innodb_buffer_pool_dump_now = 1：采用手工方式把热数据dump到本地磁盘
+innodb_buffer_pool_load_at_startup=1：启动时把热数据加载到内存
+innodb_buffer_pool_load_now=1：采用手工方式把热数据加载到内存
+只有在正常关闭或pkill mysql是才会将热数据导出。
 
 
 
