@@ -285,3 +285,7 @@ http://www.cnblogs.com/chunguang/p/5694582.html
 
 详细分析SQL语句逻辑执行过程和相关语法 https://www.cnblogs.com/f-ck-need-u/p/8656828.html
 rename database脚本 https://blog.csdn.net/mysqldba23/article/details/70054781
+查找数据库文件大小
+SELECT  table_schema AS `Database`, table_name AS `Table`, SUM(ROUND(((data_length + index_length) / 1024 / 1024), 2)) `Size in MB` 
+FROM information_schema.TABLES WHERE information_schema.TABLES.TABLE_SCHEMA='haiguan_68W' GROUP BY information_schema.TABLES.TABLE_SCHEMA,information_schema.TABLES.TABLE_NAME WITH ROLLUP
+
