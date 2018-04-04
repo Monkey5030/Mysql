@@ -184,6 +184,10 @@ SELECT a.* FROM(SELECT id,code,name FROM test_emp UNION ALL SELECT id,code,name 
 SELECT a.* FROM(SELECT id,code,name FROM test_emp WHERE age>25 UNION ALL SELECT id,code,name FROM test_emp WHERE dept='JSB')a GROUP BY a.id HAVING COUNT(a.id)=2 #交集
 SELECT a.* FROM(SELECT id,code,name FROM test_emp WHERE age>25 UNION SELECT id,code,name FROM test_emp WHERE dept='JSB')a #并集
 
+解决MySQL数据量增大之后翻页慢问题
+SELECT a.* FROM event_data a WHERE a.receive_time >= '2018-03-28 00:00:00' AND a.receive_time <= '2018-03-28 23:59:59' ORDER BY a.receive_time DESC LIMIT 56280,15;原始sql
+select a.* FROM (SELECT pk_id FROM event_data c WHERE c.receive_time >= '2018-03-28 00:00:00' AND c.receive_time <= '2018-03-28 23:59:59' ORDER BY c.receive_time DESC LIMIT 56280,15) b left join event_data a on a.pk_id=b.pk_id 优化sql
+
 
 开发规范
 表设计的规范：字段数量建议不超过20-50个做好数据评估，建议纯INT不超过1500万，含有CHAR的不要超过1000万。字段类型在满足需求条件下越小越好，尽量使用UNSIGNED存储非负整数，因为实际使用时候存储负数的场景不多。将字符转换成数字存储。例如使用UNSIGNED INT存储IPv4 地址而不是用CHAR(15) ，但这种方式只能存储IPv4，存储不了IPv6。另外可以考虑将日期转化为数字，如：from_unixtime()、unix_timestamp()。所有字段均定义为NOT NULL，除非你真的想存储null。
