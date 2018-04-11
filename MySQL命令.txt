@@ -22,6 +22,10 @@ show profile
 set profiling=1; show profiles;show profile for query quert_id;
 select state,sum(duration) as total_r,round(100*sum(duration)/(select sum(duration) from information_schema.profiling where query_id=?),2) as pct_r,count(*) as calls,sum(duration)/count(*) as "r/call" from information_schema.profiling where query_id=? group by state order by total_r desc
 
+mysqldumpslow -t10 /path/to/log3304/slowquery.log 访问时间最长的10个sql
+mysqldumpslow -s c -t10 /path/to/log3304/slowquery.log 访问次数最多的10个sql
+mysqldumpslow -s r -t10 /path/to/log3304/slowquery.log 访问记录集醉的的10个sql
+
 
 概念
 ACID 原子性 一致性 隔离性 持久性
