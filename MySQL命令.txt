@@ -291,6 +291,8 @@ innodb_buffer_pool_load_now=1：采用手工方式把热数据加载到内存
 性能调优
 http://www.cnblogs.com/chunguang/p/5694582.html
 
+mysql的zip安装 https://blog.csdn.net/fhq10/article/details/70157170
+
 详细分析SQL语句逻辑执行过程和相关语法 https://www.cnblogs.com/f-ck-need-u/p/8656828.html
 rename database脚本 https://blog.csdn.net/mysqldba23/article/details/70054781
 查找数据库文件大小
