@@ -8,6 +8,11 @@ check table tablename;
 optimize table tablename;
 这个命令可以将表中的空间碎片进行合并，并且可以消除由于删除或者更新造成的空间浪费，但OPTIMIZE TABLE 命令只对MyISAM、BDB 和InnoDB 表起作用。
 
+1、导入将excel存储为txt,然后用记事本打开txt,将该txt另存为utf8编码的txt文件
+2、导出txt,然后另存txt文件为unicode编码，再修改后缀.txt为.xls
+select `title`,`word_answer`,`right_answer`,`qgid` into outfile "C:/Users/Administrator/Desktop/output.txt" from `xy_question` where `id` in (1,2,3); //lines terminated by"/r/n" 导成txt或者excel这句不要
+
+
 load data infile '/home/mysql/film_test.txt' into table tablename;
 alter table film_test2 disable keys;
 load data infile '/home/mysql/film_test.txt' into table tablename;
