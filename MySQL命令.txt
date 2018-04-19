@@ -257,7 +257,11 @@ SELECT * FROM your_table WHERE pk>=1000 ORDER BY pk ASC LIMIT 0,20
 SELECT * FROM your_table WHERE id <= 
 (SELECT id FROM your_table ORDER BY id desc LIMIT ($page-1)*$pagesize ORDER BY id desc LIMIT $pagesize
 
-
+需要监控的参数
+OS: CPU ,Mem ,Net, IO ,Swap
+MySQL: Network,Usage,Com*,Connection, Open Table/Files,Temporary Questions
+InnoDB: written, read,dirty writes/reads,flush,innodb_rows,innodb_log,innodb_buffer_pool_pages
+doing:processlist,engine innodb status,threads,locks,slow queries
 监控
 linux和unix系统监控工具
 ps 显示系统上运行的进程列表 ps -A | grep mysqld       
@@ -303,4 +307,7 @@ rename database脚本 https://blog.csdn.net/mysqldba23/article/details/70054781
 查找数据库文件大小
 SELECT  table_schema AS `Database`, table_name AS `Table`, SUM(ROUND(((data_length + index_length) / 1024 / 1024), 2)) `Size in MB` 
 FROM information_schema.TABLES WHERE information_schema.TABLES.TABLE_SCHEMA='haiguan_68W' GROUP BY information_schema.TABLES.TABLE_SCHEMA,information_schema.TABLES.TABLE_NAME WITH ROLLUP
+
+安装与升级
+http://blog.51cto.com/xpleaf/1748063 源码安装
 
