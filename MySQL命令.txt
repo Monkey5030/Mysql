@@ -141,6 +141,8 @@ change master to master_host='192.168.203.129',master_user='mysync',master_passw
 start slave
 7.show slave status
 
+mysql-master/slave同步问题：Slave_IO_Running: No http://www.51testing.com/html/00/130600-243651.html
+
 数据库性能拾遗
 1.适当的数据文件大小
 2.碎片空洞问题
