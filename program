@@ -1,0 +1,216 @@
+
+# -*- coding=utf-8 -*-
+import xlwt
+import pymysql
+import warnings
+import datetime
+import sys
+# reload(sys)
+# sys.setdefaultencoding('utf8')
+
+warnings.filterwarnings("ignore")
+
+mysqlDb_config = {
+    'host': '127.0.0.1',
+    'user': 'root',
+    'passwd': 'qwe123',
+    'port': 3306,
+    # 'db': 'world'
+}
+
+today = datetime.date.today()
+yesterday = today - datetime.timedelta(days=1)
+tomorrow = today + datetime.timedelta(days=1)
+
+def getDB(dbConfigName):
+    dbConfig = eval(dbConfigName)
+    try:
+        conn = pymysql.connect(host=dbConfig['host'], user=dbConfig['user'], passwd=dbConfig['passwd'],
+                               port=dbConfig['port'])
+        conn.autocommit(True)
+        curr = conn.cursor()
+        curr.execute("SET NAMES utf8");
+        # curr.execute("USE %s" % dbConfig['db']);
+
+        return conn, curr
+    except MySQLdb.Error as e:
+        print("Mysql Error %d: %s" % (e.args[0], e.args[1]))
+        return None, None
+
+def mysqlTabStructure2excel(dbConfigName, tabName, schemaName, exportPath):
+    # 边框的定义
+    borders = xlwt.Borders()
+    borders.left = 1
+    borders.right = 1
+    borders.top = 1
+    borders.bottom = 1
+    borders.bottom_colour = 0x3A
+    # Initialize a style for frist row
+    style_fristRow = xlwt.XFStyle()
+    font = xlwt.Font()
+    font.name = 'Times New Roman'
+    font.bold = True
+    font.colour_index = 1
+    style_fristRow.font = font
+
+    badBG = xlwt.Pattern()
+    badBG.pattern = badBG.SOLID_PATTERN
+    badBG.pattern_fore_colour = 6
+    style_fristRow.pattern = badBG
+
+    style_fristRow.borders = borders
+
+    # Initialize a style for data row
+    style_dataRow = xlwt.XFStyle()
+    font = xlwt.Font()
+    font.name = u'隶变-简 常规体'
+    font.bold = False
+    style_dataRow.font = font
+
+    style_dataRow.borders = borders
+
+    selectSql = "SELECT  TABLE_SCHEMA userName, \
+    	table_name tabName, \
+    	ORDINAL_POSITION colNo, \
+    	COLUMN_NAME colName, \
+    	COLUMN_TYPE dataType, \
+    	IS_NULLABLE isNull, \
+    	COLUMN_COMMENT colComment \
+    FROM information_schema. COLUMNS \
+    WHERE TABLE_SCHEMA = '{schemaName}' \
+    AND table_name = '{tabName}';".format(schemaName=schemaName, tabName=tabName)
+
+    conn, curr = getDB(dbConfigName)
+    curr.execute(selectSql)
+    datas = curr.fetchall()
+    fields = curr.description
+    workbook = xlwt.Workbook()
+    sheet = workbook.add_sheet('{tabName}'.format(tabName=tabName[0:31]), cell_overwrite_ok=True)
+
+    # 写上字段信息
+    for field in range(0, len(fields)):
+        sheet.write(0, field, fields[field][0], style_fristRow)
+
+    # 获取并写入数据段信息
+    row = 1
+    col = 0
+    for row in range(1, len(datas)+1):
+        for col in range(0, len(fields)):
+            sheet.write(row, col, u'%s' % datas[row-1][col], style_dataRow)
+
+    workbook.save(r'{exportPath}/{exportName}.xls'.format(exportPath=exportPath, exportName=schemaName+'-'+tabName))
+
+    curr.close()
+    conn.close()
+
+def getSchemaTab(dbConfigName, schemaName, exportPath):
+    selectSql = "select TABLE_NAME tabName from information_schema.TABLES where TABLE_SCHEMA='{schemaName}';".format(schemaName=schemaName)
+    conn, curr = getDB(dbConfigName)
+    curr.execute(selectSql)
+    datas = curr.fetchall()
+    for tabName in datas:
+        mysqlTabStructure2excel(dbConfigName, tabName[0], schemaName, exportPath)
+
+# Batch Test
+dbConfigName = 'mysqlDb_config'
+schemaName = 'world'
+exportPath = 'D:/'
+getSchemaTab(dbConfigName, schemaName, exportPath)
+
+----------------------------------------------------------------
+# -*- coding: utf-8 -*-  
+  
+# 将多个Excel文件合并成一个  
+import xlrd  
+import xlsxwriter  
+import os  
+  
+# 打开一个excel文件  
+def open_xls(file):  
+    fh = xlrd.open_workbook(file)  
+    return fh  
+  
+  
+# 获取excel中所有的sheet表  
+def getsheet(fh):  
+    return fh.sheets()  
+  
+  
+# 获取sheet表的行数  
+def getnrows(fh, sheet):  
+    table = fh.sheets()[sheet]  
+    return table.nrows  
+  
+  
+# 读取文件内容并返回行内容  
+def getFilect(file, shnum):  
+    fh = open_xls(file)  
+    table = fh.sheets()[shnum]  
+    num = table.nrows  
+    datavalue = []  
+    for row in range(num):  
+        rdata = table.row_values(row)  
+        datavalue.append(rdata)  
+    datavalue.append('') # 两元素间添加一空格  
+    return datavalue  
+  
+  
+# 获取sheet表的个数  
+def getshnum(fh):  
+    x = 0  
+    sh = getsheet(fh)  
+    for sheet in sh:  
+        x += 1  
+    return x  
+  
+  
+def searchFileOfDir(path, word):  
+    fpList = []  
+    for filename in os.listdir(path):  
+        fp = os.path.join(path, filename)  
+        if os.path.isfile(fp) and word in filename:  
+            fpList.append(fp)  
+    return fpList  
+  
+  
+if __name__ == '__main__':  
+    # 定义要合并的excel文件列表  
+    path = 'd:/'  
+    word = 'world'  
+    allxls = searchFileOfDir(path, word)  
+  
+    # 存储所有读取的结果  
+    datavalues = []  
+    for fl in allxls:  
+        fh = open_xls(fl)  
+        x = getshnum(fh)  
+        for shnum in range(x):  
+            print("正在读取文件：" + str(fl) + "的第" + str(shnum) + "个sheet表的内容...")  
+            rvalue = getFilect(fl, shnum)  
+        datavalues.extend(rvalue)  
+    rvalue = datavalues  
+  
+    # 定义最终合并后生成的新文件  
+    endfile = 'd:/excel3.xlsx'  
+    wb1 = xlsxwriter.Workbook(endfile)  
+    # 创建一个sheet工作对象  
+    ws = wb1.add_worksheet()  
+  
+    format_title = wb1.add_format()  # 定义format格式对象  
+    format_title.set_border(1)  # 定义format对象单元格边框加粗(1像素)的格式  
+  
+    format_data = wb1.add_format()  # 定义format_title格式对象  
+    format_data.set_border(1)  # 定义format_title对象单元格边框加粗(1像素)的格式  
+    format_data.set_bg_color('#cccccc')  # 定义format_title对象单元格背景颜色为  
+    format_data.set_align('center')  # 定义format_title对象单元格居中对齐的格式  
+    format_data.set_bold()  # 定义format_title对象单元格内容加粗的格式  
+  
+    for a in range(len(rvalue)):  
+        for b in range(len(rvalue[a])):  
+            c = rvalue[a][b]  
+            if c in ('userName', 'tabName', 'colNo', 'colName', 'dataType', 'isNull', 'colComment'):  
+                ws.write(a, b, c, format_data)  
+            else:  
+                ws.write(a, b, c, format_title)  
+    wb1.close()  
+    print("文件合并完成") 
