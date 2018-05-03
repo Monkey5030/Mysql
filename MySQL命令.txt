@@ -141,6 +141,7 @@ change master to master_host='192.168.203.129',master_user='mysync',master_passw
 start slave
 7.show slave status
 
+mysql5.7多源复制 http://www.cnblogs.com/xuanzhi201111/p/5151666.html
 mysql-master/slave同步问题：Slave_IO_Running: No http://www.51testing.com/html/00/130600-243651.html
 
 数据库性能拾遗
