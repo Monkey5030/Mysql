@@ -1,0 +1,105 @@
+MySQL5.7的新特性
+MySQL 5.7的官方下载地址：http://cdn.mysql.com//Downloads/MySQL-5.7/mysql-5.7.10-linux-glibc2.5-x86_64.tar.gz
+ 
+下面简单介绍一下安装：
+[root@MySQL soft]# tar xf mysql-5.7.10-linux-glibc2.5-x86_64.tar.gz -C /data/service/
+[root@MySQL soft]# cd /data/service/
+[root@MySQL service]# mv mysql-5.7.10-linux-glibc2.5-x86_64/ mysql-5.7.10
+下面进行数据目录的创建以及授权：
+[root@MySQL service]#  mkdir /data/{mysql3306,mysql3306log} -p
+[root@MySQL service]# groupadd mysql
+[root@MySQL service]# useradd -r -g mysql mysql
+[root@MySQL service]# chown -R mysql:mysql mysql-5.7.10/
+[root@MySQL service]# chown -R mysql:mysql /data/mysql3306*
+基本操作已经完成，下面进行初始化操作，在MySQL 5.7的初始化操作与MySQL 5.6有点不同了，下面在MySQL 5.7的版本用MySQL 5.6的初始化方式进行操作一下，让大家看下会报什么错：
+[root@MySQL mysql-5.7.10]# ./bin/mysql_install_db --user=mysql --datadir=/data/mysql3306
+2016-01-21 11:29:05 [WARNING] mysql_install_db is deprecated. Please consider switching to mysqld --initialize
+2016-01-21 11:29:10 [ERROR]   The bootstrap log isn't empty:
+2016-01-21 11:29:10 [ERROR]   2016-01-21T03:29:05.633658Z 0 [Warning] --bootstrap is deprecated. Please consider using --initialize instead
+2016-01-21T03:29:05.641584Z 0 [ERROR] Can't read from messagefile '/usr/share/mysql/english/errmsg.sys'
+[root@MySQL mysql-5.7.10]# 
+可以看到mysql_install_db is deprecated，说不赞同使用mysql_install_db，推荐使用的方法是：
+Please consider switching to mysqld --initialize ，Please consider using --initialize instead
+正确的初始方式如下：./bin/mysqld --initialize --user=mysql --basedir=/data/service/mysql-5.7.10/  --datadir=/data/mysql3306，如果datadir目录有文件，则会报以下错：
+[root@MySQL mysql-5.7.10]# ./bin/mysqld --initialize --user=mysql --basedir=/data/service/mysql-5.7.10/  --datadir=/data/mysql3306
+2016-01-21T05:43:56.355999Z 0 [Warning] TIMESTAMP with implicit DEFAULT value is deprecated. Please use --explicit_defaults_for_timestamp server option (see documentation for more details).
+2016-01-21T05:43:56.357796Z 0 [ERROR] --initialize specified but the data directory has files in it. Aborting.
+2016-01-21T05:43:56.357814Z 0 [ERROR] Aborting
+ 所以要把data directory文件删除掉再执行，如果删除目录下的文件还是报同样的错，可以试试把目录删除掉，再创建一个，然后授权：
+[root@MySQL mysql-5.7.10]# ./bin/mysqld --initialize --user=mysql --basedir=/data/service/mysql-5.7.10/  --datadir=/data/mysql3306
+2016-01-21T05:47:01.804937Z 0 [Warning] TIMESTAMP with implicit DEFAULT value is deprecated. Please use --explicit_defaults_for_timestamp server option (see documentation for more details).
+2016-01-21T05:47:03.552899Z 0 [Warning] InnoDB: New log files created, LSN=45790
+2016-01-21T05:47:03.816849Z 0 [Warning] InnoDB: Creating foreign key constraint system tables.
+2016-01-21T05:47:03.883956Z 0 [Warning] No existing UUID has been found, so we assume that this is the first time that this server has been started. Generating a new UUID: 660686ae-c002-11e5-843e-00163e0217d7.
+2016-01-21T05:47:03.886131Z 0 [Warning] Gtid table is not ready to be used. Table 'mysql.gtid_executed' cannot be opened.
+2016-01-21T05:47:03.887120Z 1 [Note] A temporary password is generated for root@localhost: )vyd3aXj8hhC
+MySQL 5.7初始化完后会生成一个临时的密码，A temporary password is generated for root@localhost: )vyd3aXj8hhC 如果想初始化表空间，在后面加上 --innodb_data_file_path=ibdata1:1G:autoextend即可。
+启动MySQL 5.7，拷贝support-files/my-default.cnf ./
+[root@MySQL mysql-5.7.10]# cp support-files/my-default.cnf ./my.cnf
+[root@MySQL mysql-5.7.10]# chown -R mysql:mysql my.cnf 
+编辑my.cnf加上基本选项：
+[mysqld]
+# changes to the binary log between backups.
+log_bin
+# These are commonly set, remove the # and set as required.
+basedir =  /data/service/mysql-5.7.10
+datadir = /data/mysql3306
+port = 3306
+server_id = 100
+socket = /tmp/mysqld.sock
+编辑启动脚本：
+[root@MySQL mysql-5.7.10]# cat start_mysql.sh 
+#!/bin/bash
+nohup /data/service/mysql-5.7.10/bin/mysqld_safe --defaults-file=/data/service/mysql-5.7.10/my.cnf > /data/service/mysql-5.7.10/start_stop.log 2>&1 &
+运行脚本启动 sh start_mysql.sh 。
+ 
+登录MySQL 5.7，先添加MySQL 5.7的bin路径：
+[root@MySQL mysql-5.7.10]# cat /etc/profile.d/mysql.sh  
+export PATH=/data/service/mysql-5.7.10/bin:$PATH
+[root@MySQL mysql-5.7.10]# source /etc/profile.d/mysql.sh 
+登录时输入的密码是刚刚初始化完的密码：
+[root@MySQL mysql-5.7.10]# mysql -uroot -p')vyd3aXj8hhC' -S /tmp/mysqld.sock
+mysql: [Warning] Using a password on the command line interface can be insecure.
+Welcome to the MySQL monitor.  Commands end with ; or \g.
+Your MySQL connection id is 2
+Server version: 5.7.10-log
+Copyright (c) 2000, 2015, Oracle and/or its affiliates. All rights reserved.
+Oracle is a registered trademark of Oracle Corporation and/or its
+affiliates. Other names may be trademarks of their respective
+owners.
+Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+mysql> 
+第一次登录，是必须要修改密码才能查看show databases;
+mysql> show databases;
+ERROR 1820 (HY000): You must reset your password using ALTER USER statement before executing this statement.
+mysql> 
+ 从上面的信息可以看到，叫我们使用ALTER USER进行修改，下面我们修改一下密码，有关更多MySQL 5.7的用户密码设置可以参考：https://dev.mysql.com/doc/refman/5.7/en/password-expiration-policy.html
+mysql> ALTER USER USER() IDENTIFIED BY '123456';
+Query OK, 0 rows affected (0.01 sec)
+mysql> show databases;
++--------------------+
+| Database           |
++--------------------+
+| information_schema |
+| mysql              |
+| performance_schema |
+| sys                |
++--------------------+
+4 rows in set (0.00 sec)
+mysql> 
+MySQL 5.7的mysql.user表已经没有password这一列了，所以查询用户和密码的方式如下：
+mysql> select user,host,authentication_string from mysql.user;
++-----------+-----------+-------------------------------------------+
+| user      | host      | authentication_string                     |
++-----------+-----------+-------------------------------------------+
+| root      | localhost | *6BB4837EB74329105EE4568DDA7DC67ED2CA2AD9 |
+| mysql.sys | localhost | *THISISNOTAVALIDPASSWORDTHATCANBEUSEDHERE |
++-----------+-----------+-------------------------------------------+
+2 rows in set (0.00 sec)
+mysql> select password('123456');
++-------------------------------------------+
+| password('123456')                        |
++-------------------------------------------+
+| *6BB4837EB74329105EE4568DDA7DC67ED2CA2AD9 |
++-------------------------------------------+
+1 row in set, 1 warning (0.00 sec)
