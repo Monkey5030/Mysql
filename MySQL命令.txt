@@ -1,4 +1,5 @@
 命令行操作
+新手MySQL工程师必备命令速查手册  https://mp.weixin.qq.com/s/87BoE2-0mW_3qALyNSpiTw
 show status like 'Com_%';
 通过以上几个参数，可以很容易地了解当前数据库的应用是以插入更新为主还是以查询
 操作为主，以及各种类型的SQL 大致的执行比例是多少。
