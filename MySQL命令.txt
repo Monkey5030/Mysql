@@ -315,3 +315,5 @@ FROM information_schema.TABLES WHERE information_schema.TABLES.TABLE_SCHEMA='hai
 安装与升级
 http://blog.51cto.com/xpleaf/1748063 源码安装
 
+Keepalived + 双mycat + mysql主主复制   http://www.cndba.cn/Marvinn/article/2615
+
