@@ -316,4 +316,11 @@ FROM information_schema.TABLES WHERE information_schema.TABLES.TABLE_SCHEMA='hai
 http://blog.51cto.com/xpleaf/1748063 源码安装
 
 Keepalived + 双mycat + mysql主主复制   http://www.cndba.cn/Marvinn/article/2615
-
+MySQL逗号分割字段的行列转换技巧
+select a.ID,substring_index(substring_index(a.mSize,',',b.help_topic_id+1),',',-1) 
+from 
+tbl_name a
+join
+mysql.help_topic b
+on b.help_topic_id < (length(a.mSize) - length(replace(a.mSize,',',''))+1)
+order by a.ID;
