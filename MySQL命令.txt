@@ -258,6 +258,7 @@ Flags:      NOT_NULL NO_DEFAULT_VALUE
 mysql分页查询优化 https://www.cnblogs.com/geningchao/p/6649907.html
 SELECT * FROM 表名称 LIMIT M,N
 SELECT * FROM your_table WHERE pk>=1000 ORDER BY pk ASC LIMIT 0,20
+select a.* from tablename a join (select id from tablename limit 100000,20) b on a.id=b.id;
 SELECT * FROM your_table WHERE id <= 
 (SELECT id FROM your_table ORDER BY id desc LIMIT ($page-1)*$pagesize ORDER BY id desc LIMIT $pagesize
 
