@@ -1,3 +1,33 @@
+#查找镜像 MySQL5.7安装
+yum repolist all | grep mysql
+
+#下载安装包
+wget -i -c http://dev.mysql.com/get/mysql57-community-release-el7-10.noarch.rpm
+#开始安装
+yum -y install mysql57-community-release-el7-10.noarch.rpm
+yum -y install mysql-community-server
+#开启服务
+systemctl start mysqld.service
+#修改配置文件，跳过验证
+sed -i '/mysqld/a\skip-grant-tables' /etc/my.cnf
+#修改密码及开放远程访问
+mysql -uroot mysql 
+update user set authentication_string='Boguan@365!' where user='root';
+GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' IDENTIFIED BY 'Boguan@365' WITH GRANT OPTION;
+flush privileges;
+
+firewall-cmd --zone=public --add-port=3306/tcp --permanent
+设置开机启动
+systemctl enable mysqld
+systemctl daemon-reload
+
+error 1820
+alter user user() identified by "Password";
+
+
+___________________________________________________________________________________________________________
+
+
 MySQL5.7的新特性
 MySQL 5.7的官方下载地址：http://cdn.mysql.com//Downloads/MySQL-5.7/mysql-5.7.10-linux-glibc2.5-x86_64.tar.gz
  
