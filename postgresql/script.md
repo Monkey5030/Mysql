@@ -67,8 +67,10 @@ Greenplum/PostgreSQL中数据表数据去重的几种方法
 
 * postgresql中去重   
 ```
-	create table vertent (id bigint)  
-	insert into vertent values (1),(2),(2),(3)  
+	create table vertent (id bigint);  
+	
+	insert into vertent values (1),(2),(2),(3);    
+	
 	delete from vertent where ctid in
 	(select ctid from
 	(select ctid,id,
