@@ -1,6 +1,6 @@
-# Greenplum安装
+
 # 1.修改主机名称
-![1609491-20190805161844129-1259150148.png](/tdl/tfl/pictures/202012/tapd_47536328_1606960094_4.png)
+![image](https://github.com/Monkey5030/LINUX/blob/master/picture/%E4%B8%BB%E6%9C%BA%E4%BF%A1%E6%81%AF.png)  
 #2. 安装准备
 ## 2.1修改各节点hosts(所有节点) 
 ```
@@ -78,26 +78,26 @@ chown -R gpadmin:gpadmin /home/gpadmin
 echo "gpadmin" | passwd --stdin gpadmin
 ```
 # 3 安装Greenplum DB
-## 3.1 在Master节点上安装Greeplum
-安装包下载地址：https://network.pivotal.io/products/pivotal-gpdb/#/releases/413133/file_groups/1866 
-安装包是rpm格式的执行rpm安装命令
+## 3.1 在Master节点上安装Greeplum  
+安装包下载地址：https://network.pivotal.io/products/pivotal-gpdb/#/releases/413133/file_groups/1866  
+安装包是rpm格式的执行rpm安装命令  
 ```
 [root@wuxiang-test-1 ~]#  rpm -ivh greenplum-db-6.12.1-rhel7-x86_64.rpm
 ```
-安装前需要下载一些依赖包:
+安装前需要下载一些依赖包:  
 ```
 yum install apr apr-util bzip2 krb5-devel libyaml lrsync rsync zip net-tools libevent
 ```
-默认的安装路径是/usr/local。
-将/usr/local/greenplum-db-5.21.0文件拷贝至所有节点（可以压缩再解压，也可以使用gpssh方式）
-然后需要修改该路径gpadmin操作权限（所有节点）：
+默认的安装路径是/usr/local。  
+将/usr/local/greenplum-db-5.21.0文件拷贝至所有节点（可以压缩再解压，也可以使用gpssh方式）  
+然后需要修改该路径gpadmin操作权限（所有节点）：  
 
 ``` 
 chown -R gpadmin:gpadmin /usr/local
 chown -R gpadmin:gpadmin /opt
 ```
-## 3.2 创建hostlist，seg_hosts文件
-切换gpadmin用户，创建conf文件夹（需要创建conf）
+## 3.2 创建hostlist，seg_hosts文件  
+切换gpadmin用户，创建conf文件夹（需要创建conf）  
 ```
 [gpadmin@wuxiang-test-1 ~]# cd conf/ 
 [gpadmin@wuxiang-test-1 conf]# cat hostlist 
@@ -112,7 +112,7 @@ wuxiang-test-3
 wuxiang-test-4 
 wuxiang-test-5
 ```
-## 3.3 配置免密连接
+## 3.3 配置免密连接  
 ```
 [root@ wuxiang-test-1 ~]# su gpadmin
 [gpadmin@ wuxiang-test-1 ~]# source /usr/local/greenplum-db/greenplum_path.sh  
@@ -140,11 +140,11 @@ wuxiang-test-5
   ... finished key exchange with wuxiang-test-5
 [INFO] completed successfully
 ```
-测试免密是否成功：
+测试免密是否成功：  
 ```
 [gpadmin@wuxiang-test-1 ~]# ssh wuxiang-test-4
 ```
-或者用gpssh：
+或者用gpssh：  
 ```
 [gpadmin@wuxiang-test-1 ~]$ gpssh -f /home/gpadmin/conf/hostlist
 => pwd
@@ -155,8 +155,8 @@ wuxiang-test-5
 [wuxiang-test-2] /home/gpadmin
 => exit
 ```
-# 4 初始化数据库
-## 4.1 创建资源目录
+# 4 初始化数据库  
+## 4.1 创建资源目录  
 ```
 source /usr/local/ greenplum-db/greenplum_path.sh
 gpssh -f /home/gpadmin/conf/hostlist #统一处理所有节点
@@ -168,7 +168,7 @@ gpssh -f /home/gpadmin/conf/hostlist #统一处理所有节点
 => mkdir -p /opt/greenplum/data2/primary
 => mkdir -p /opt/greenplum/data2/mirror
 ```
-## 4.2 环境变量配置（所有节点）
+## 4.2 环境变量配置（所有节点）  
 ```
 [gpadmin@wuxiang-test-1 ~]$ cat /home/gpadmin/.bash_profile
 # .bash_profile
@@ -190,13 +190,13 @@ export MASTER_DATA_DIRECTORY=/opt/greenplum/data/master/gpseg-1
 export GPPORT=5432
 export PGDATABASE=gp_sydb
 ```
-注：不能用gpssh编辑文件
-让环境变量生效：
+注：不能用gpssh编辑文件  
+让环境变量生效：  
 ```
 source /home/gpadmin/.bash_profile
 ```
-## 4.3 NTP配置 （单节点不需要配置）
-启用master节点上的ntp，并在Segment节点上配置和启动NTP：
+## 4.3 NTP配置 （单节点不需要配置）  
+启用master节点上的ntp，并在Segment节点上配置和启动NTP：  
 ```
 #master 节点
 [root@wuxiang-test-1 ~]#&nbsp;echo "server 127.127.1.0" >>/etc/ntp.conf 
@@ -206,7 +206,7 @@ source /home/gpadmin/.bash_profile
 [root@wuxiang-test-1 ~]#&nbsp;systemctl start  ntpd
 [root@wuxiang-test-1 ~]#&nbsp;systemctl enable  ntpd
 ```
-## 4.4 检查各节点的连通性
+## 4.4 检查各节点的连通性  
 `[gpadmin@wuxiang-test-1 bin]$ cd /usr/local/greenplum-db/bin` 
 ```
 [gpadmin@wuxiang-test-1 bin]$ gpcheckperf -f /home/gpadmin/conf/hostlist -r N -d /tmp
@@ -239,13 +239,13 @@ max = 112.12 MB/sec
 avg = 109.23 MB/sec
 median = 110.49 MB/sec
 ```
-## 4.5 执行初始化
+## 4.5 执行初始化  
 ```
 [gpadmin@wuxiang-test-1 bin]$ cd /usr/local/greenplum-db/docs/cli_help/gpconfigs
 [gpadmin@wuxiang-test-1 gpconfigs]$ cp gpinitsystem_config initgp_config
 [gpadmin@wuxiang-test-1 gpconfigs]$ vim initgp_config
 ```
-修改内容：
+修改内容：  
 ```
 # FILE NAME: gpinitsystem_config
 
@@ -322,26 +322,26 @@ ENCODING=UNICODE
 #### with the -h option of gpinitsystem.
 #MACHINE_LIST_FILE=/home/gpadmin/gpconfigs/hostfile_gpinitsystem
 ```
-执行初始化:
+执行初始化:  
 ```
 [gpadmin@wuxiang-test-1 bin]$ gpinitsystem -h /home/gpadmin/conf/seg_hosts -c initgp_config
 ```
-在初始化前要执行：
+在初始化前要执行：  
 ```
 cd /opt/greenplum/data/master/
 mkdir gpseg-1
 ```
-# 5 数据库操作
-## 5.1 停止和启动集群
+# 5 数据库操作  
+## 5.1 停止和启动集群  
 ```
 gpstop -M fast
 gpstart -a
 ```
-## 5.2 登陆数据库（可以初始化后直接登录数据库）
+## 5.2 登陆数据库（可以初始化后直接登录数据库）  
 ```
 psql -d postgres
 ```
-## 5.3 集群状态
+## 5.3 集群状态  
 ```
 gpstate -e #查看mirror的状态
 gpstate -f #查看standby master的状态
@@ -349,22 +349,22 @@ gpstate -s #查看整个GP群集的状态
 gpstate -i #查看GP的版本
 gpstate --help #帮助文档，可以查看gpstate更多用法
 ```
-目前为止数据库已经操作完毕。默认只有本地可以连数据库，如果需要别的I可以连，需要修改gp_hba.conf文件
-# GPText安装
-确保nc（netcat）已安装在所有Greenplum群集主机
+目前为止数据库已经操作完毕。默认只有本地可以连数据库，如果需要别的I可以连，需要修改gp_hba.conf文件  
+# GPText安装  
+确保nc（netcat）已安装在所有Greenplum群集主机  
 ```
 yum install nc
 ```
-lsof建议在所有群集主机上安装
+lsof建议在所有群集主机上安装  
 ```
 sudo yum install lsof
 ```
-## 1JDK安装
-### 1.1 解压
+## 1JDK安装  
+### 1.1 解压  
 ```
 sudo tar zxvf jdk-8u66-linux-x64.tar.gz
 ```
-### 1.2 设置JDK的环境变量
+### 1.2 设置JDK的环境变量  
 ```
 vim /etc/profile
 ```
@@ -374,11 +374,11 @@ export JAVA_HOME=/usr/local/jdk1.8.0_271
 export JRE_HOME=$JAVA_HOME/jre
 export PATH=$PATH:$JAVA_HOME/bin:$JRE_HOME/bin
 ```
-使环境变量生效:
+使环境变量生效:  
 ```
 source /etc/profile
 ```
-### 1.3 检验安装是否成功
+### 1.3 检验安装是否成功  
 ```
 [root@gp01 local]# java -version
 
@@ -386,7 +386,7 @@ java version "1.8.0_271"
 Java(TM) SE Runtime Environment (build 1.8.0_271-b09)
 Java HotSpot(TM) 64-Bit Server VM (build 25.271-b09, mixed mode)
 ```
-## 2 安装ZK
+## 2 安装ZK  
 
 ``` 
 cd /usr/local
@@ -400,7 +400,7 @@ touch data/myid
 ``` 
 vim data、myid      #分别在不同的主机上写入主机名
 ```
-### 2.1 配置文件
+### 2.1 配置文件  
 ``` 
 mv conf/zoo_sample.cfg conf/zoo.cfg
 vim conf/zoo.cfg
@@ -412,7 +412,7 @@ vim conf/zoo.cfg
  server.2=sdw1:2888:3888
  server.3=sdw2:2888:3888
 ```
-### 2.2 配置环境
+### 2.2 配置环境      
 ```
 vim /etc/profile
 ```
@@ -428,8 +428,8 @@ source /etc/profile
 zkServer.sh start
 ```
 
-## 3 安装GPText
-下载gptext：https://network.pivotal.io/products/pivotal-gpdb/#/releases/253113/file_groups/1331
+## 3 安装GPText  
+下载gptext：https://network.pivotal.io/products/pivotal-gpdb/#/releases/253113/file_groups/1331  
 ``` 
 cd /home/gpadmin
 tar -zxvf greenplum-text-3.1.0-rhel6_x86_64.tar.gz
@@ -437,7 +437,7 @@ ls
       >>gptext_install_config 
       >>greenplum-text-3.1.0-rhel6_x86_64.bin
 ```
-链接其他主机
+链接其他主机  
 ```
 source $GPHOME/greenplum_path.sh
 ```
@@ -448,7 +448,7 @@ vim hostlist.txt                         //创建hostaname文件，用于链接�
        sdw2
 ```
 
-### 在需要安装的机器上批量安装并创建目录
+### 在需要安装的机器上批量安装并创建目录  
 ``` 
 mkdir /usr/local/greenplum-text-3.1.0
 mkdir /usr/local/greenplum-solr
@@ -462,11 +462,11 @@ chmod 775 /data/gptext
 chown gpadmin:gpadmin greenplum-text-3.1.0-rhel6_x86_64.bin
 chown gpadmin:gpadmin gptext_install_config
 ```
-### 进入gpadmin
+### 进入gpadmin  
 ``` 
 su – gpadmin
 ```
-### 修改配置文件gptext_install_config
+### 修改配置文件gptext_install_config  
 ```
  declare -a GPTEXT_HOSTS=(mdw swd1 sdw2)    
  			declare -a GPTEXT_HOSTS=(mdw swd1 sdw2)                             //声明集群的主机名
@@ -481,22 +481,22 @@ su – gpadmin
        ZOO_MAX_PORT_LIMIT=12188
        GPTEXT_JAVA_HOME=/usr/local/jdk1.8.0_191 
 ```
-### 运行安装文件
+### 运行安装文件  
 ```
 ./greenplum-text-3.1.0-rhel6_x86_64.bin -c gptext_install_config
 ```
-### 启动gptext
+### 启动gptext  
 ```
 source /usr/local/greenplum-text-3.5.0/greenplum-text_path.sh
 source /usr/local/greenplum-db/greenplum_path.sh
 ```
- 在数据库安装gptext实例，gp_sydb是本地数据库
+ 在数据库安装gptext实例，gp_sydb是本地数据库  
 ```
 gptext-installsql gp_sydb
 ```
-###  启动gptext
+###  启动gptext  
 ``` 
 gpconfig -c custom_variable_classes -v 'gptext'
 ```
-### 配置greenplum数据库
-http://gptext.docs.pivotal.io/350/topics/installing.html                           ---根据官方文档修改
+### 配置greenplum数据库  
+http://gptext.docs.pivotal.io/350/topics/installing.html                           ---根据官方文档修改  
