@@ -49,19 +49,19 @@ Greenplum/PostgreSQL中数据表数据去重的几种方法
 这种语句适合所有的GP表，特别对那种没有唯一主键的数据仓库的表进行去重很有用。  
 * greenplum去重  
 	```
-	delete from public.ods_m_monitor_hour where gp_segment_id::varchar(100)||ctid::varchar(100) in
+	delete from tablename where gp_segment_id::varchar(100)||ctid::varchar(100) in
 	(select t.ctid from
-	(select gp_segment_id::varchar(100)||ctid::varchar(100) as ctid,mn_code,pollute_code,monitor_time,
-	row_number() over (partition by mn_code,pollute_code,monitor_time) rows_num
-	from public.ods_m_monitor_hour  ) t
+	(select gp_segment_id::varchar(100)||ctid::varchar(100) as ctid,a.cloumn1,a.column2,a.column3,
+	row_number() over (partition by a.cloumn1,a.column2,a.column3) rows_num
+	from tablename a  ) t
 	where t.rows_num >=2);
 	```  
 	```
-	delete from public.ods_m_monitor_hour where (gp_segment_id,ctid) in
+	delete from tablename where (gp_segment_id,ctid) in
 	(select t.gp_segment_id,t.ctid from
-	(select gp_segment_id,ctid,mn_code,pollute_code,monitor_time,
-	row_number() over (partition by mn_code,pollute_code,monitor_time) rows_num
-	from public.ods_m_monitor_hour ) t
+	(select gp_segment_id,ctid,a.cloumn1,a.column2,a.column3,
+	row_number() over (partition by a.cloumn1,a.column2,a.column3) rows_num
+	from tablename a ) t
 	where t.rows_num >=2);  
 	```  
 
