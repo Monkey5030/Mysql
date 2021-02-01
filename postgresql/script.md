@@ -55,7 +55,9 @@ Greenplum/PostgreSQL中数据表数据去重的几种方法
 	row_number() over (partition by mn_code,pollute_code,monitor_time) rows_num
 	from public.ods_m_monitor_hour  ) t
 	where t.rows_num >=2);
-	或：
+	```
+	
+	```
 	delete from public.ods_m_monitor_hour where (gp_segment_id,ctid) in
 	(select t.gp_segment_id,t.ctid from
 	(select gp_segment_id,ctid,mn_code,pollute_code,monitor_time,
