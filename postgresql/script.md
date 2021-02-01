@@ -81,10 +81,10 @@ Greenplum/PostgreSQL中数据表数据去重的几种方法
 	
 * oracle去重    
 ```
-	delete from public.ods_m_monitor_hour  where ROWID in
+	delete from tablename  where ROWID in
 	(select ROWID from
-	(select ROWID,mn_code,pollute_code,monitor_time,
-	row_number() over (partition by mn_code,pollute_code,monitor_time) rows_num
-	from public.ods_m_monitor_hour  ) t
+	(select ROWID,a.cloumn1,a.column2,a.column3,
+	row_number() over (partition by a.cloumn1,a.column2,a.column3) rows_num
+	from tablename  ) t
 	where t.rows_num >=2);
 ```
