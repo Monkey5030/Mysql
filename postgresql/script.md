@@ -67,11 +67,13 @@ Greenplum/PostgreSQL中数据表数据去重的几种方法
 
 * postgresql中去重   
 ```
-	delete from public.ods_m_monitor_hour  where ctid in
+	create table vertent (id bigint)  
+	insert into vertent values (1),(2),(2),(3)  
+	delete from vertent where ctid in
 	(select ctid from
-	(select ctid,mn_code,pollute_code,monitor_time,
-	row_number() over (partition by mn_code,pollute_code,monitor_time) rows_num
-	from public.ods_m_monitor_hour ) t
+	(select ctid,id,
+	row_number() over (partition by id) rows_num
+	from vertent ) t
 	where t.rows_num >=2);
 ```
 	
