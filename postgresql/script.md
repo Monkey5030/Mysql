@@ -85,6 +85,6 @@ Greenplum/PostgreSQL中数据表数据去重的几种方法
 	(select ROWID from
 	(select ROWID,a.cloumn1,a.column2,a.column3,
 	row_number() over (partition by a.cloumn1,a.column2,a.column3) rows_num
-	from tablename  ) t
+	from tablename a  ) t
 	where t.rows_num >=2);
 ```
