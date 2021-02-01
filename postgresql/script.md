@@ -46,8 +46,8 @@ WHERE relkind = 'r' AND n.nspname = 'calc';
 # 删除重复行  
 Greenplum/PostgreSQL中数据表数据去重的几种方法  
 对于在PostgreSQL中，唯一确定一行的位置的是用ctid,可以用这个ctid作为一行的唯一标识；在Oracle中，数据表中的一行的唯一标识可以使用ROWID进行标识，这作为这一行的物理地址信息。而在GP中，要唯一的标识出一行表数据，需要使用gp_segment_id加上ctid进行标识。 gp_segment_id代表的是GP的segment的节点标识，每个子库的标识是唯一的  
-这种语句适合所有的GP表，特别对那种没有唯一主键的数据仓库的表进行去重很有用。
-	* greenplum去重  
+这种语句适合所有的GP表，特别对那种没有唯一主键的数据仓库的表进行去重很有用。  
+* greenplum去重  
 	```
 	delete from public.ods_m_monitor_hour where gp_segment_id::varchar(100)||ctid::varchar(100) in
 	(select t.ctid from
@@ -55,33 +55,32 @@ Greenplum/PostgreSQL中数据表数据去重的几种方法
 	row_number() over (partition by mn_code,pollute_code,monitor_time) rows_num
 	from public.ods_m_monitor_hour  ) t
 	where t.rows_num >=2);
-	```
-	
+	```  
 	```
 	delete from public.ods_m_monitor_hour where (gp_segment_id,ctid) in
 	(select t.gp_segment_id,t.ctid from
 	(select gp_segment_id,ctid,mn_code,pollute_code,monitor_time,
 	row_number() over (partition by mn_code,pollute_code,monitor_time) rows_num
 	from public.ods_m_monitor_hour ) t
-	where t.rows_num >=2);
-	```
+	where t.rows_num >=2);  
+	```  
 
-	* postgresql中去重  
-	```
+* postgresql中去重   
+```
 	delete from public.ods_m_monitor_hour  where ctid in
 	(select ctid from
 	(select ctid,mn_code,pollute_code,monitor_time,
 	row_number() over (partition by mn_code,pollute_code,monitor_time) rows_num
 	from public.ods_m_monitor_hour ) t
 	where t.rows_num >=2);
-	```
+```
 	
-	* oracle去重  
-	```
+* oracle去重    
+```
 	delete from public.ods_m_monitor_hour  where ROWID in
 	(select ROWID from
 	(select ROWID,mn_code,pollute_code,monitor_time,
 	row_number() over (partition by mn_code,pollute_code,monitor_time) rows_num
 	from public.ods_m_monitor_hour  ) t
 	where t.rows_num >=2);
-	```
+```
