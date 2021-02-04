@@ -88,3 +88,10 @@ Greenplum/PostgreSQL中数据表数据去重的几种方法
 	from tablename a  ) t
 	where t.rows_num >=2);
 ```
+# copy导入导出数据  
+```
+导入  
+psql -Ugpadmin -W -h192.168.1.28 -p12345 -dgpdpot -c "copy edge_author_2016(src,dest) from stdin with delimiter ','  NULL 'null_string' "  <  /opt/oracledata/old_re/dege_author_2016.csv  
+导出  
+psql -Ugpadmin -W -h192.168.1.28 -p12345 -dgpdpot  -c "copy tablename from stdout " > /opt/dpot/data/dt/pagerank.csv  
+```
