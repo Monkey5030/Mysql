@@ -95,3 +95,15 @@ psql -Ugpadmin -W -h192.168.1.28 -p12345 -dgpdpot -c "copy edge_author_2016(src,
 导出  
 psql -Ugpadmin -W -h192.168.1.28 -p12345 -dgpdpot  -c "copy tablename from stdout " > /opt/dpot/data/dt/pagerank.csv  
 ```
+# 外部表  
+```
+CREATE SERVER mysql_server FOREIGN DATA WRAPPER mysql_fdw OPTIONS (host '192.168.1.25', port '3306');
+
+CREATE USER MAPPING FOR gpadmin --greenplum登录账户
+SERVER mysql_server  
+OPTIONS (username 'uesrname', password '123456');  
+
+CREATE FOREIGN TABLE userinfo (id int8,name text) server mysql_server options (dbname 'dpot_web', table_name 'user');  
+
+select * from userinfo
+```
